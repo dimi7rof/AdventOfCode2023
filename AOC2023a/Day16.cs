@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using System.Linq;
-using System.Net.Http.Headers;
-
-namespace AOC2023a;
+﻿namespace AOC2023a;
 
 public static class Day16
 {
@@ -10,11 +6,9 @@ public static class Day16
     private static char[,] _array;
     private static long _steps;
     private static HashSet<(char, int, int)> _stack = new();
-    private static Stopwatch _sw = new Stopwatch();
 
     public static async Task Part01()
     {
-        _sw.Start();
         var input = @".|...\....
 |.-.\.....
 .....|-...
