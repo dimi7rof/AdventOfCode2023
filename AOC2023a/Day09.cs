@@ -2,7 +2,7 @@
 
 internal static class Day09
 {
-    public static int Part01()
+    private static List<List<int>> Prepare()
     {
         var example = @"0 3 6 9 12 15
 1 3 6 10 15 21
@@ -18,18 +18,24 @@ internal static class Day09
                 .ToList())
             .ToList();
 
+        return input;
+    }
+
+    public static int Part01()
+    {
+        var input = Prepare();
         var resultList = new List<int>();
 
         foreach (var row in input)
         {
-            resultList.Add(NextRow(row));
+            resultList.Add(AddAtTheEnd(row));
         }
 
         return resultList.Sum();
         //1806615041
     }
 
-    private static int NextRow(List<int> row)
+    private static int AddAtTheEnd(List<int> row)
     {
         var nextRow = new List<int>();
 
@@ -40,10 +46,41 @@ internal static class Day09
 
         if (nextRow.Any(x => x != 0))
         {
-            NextRow(nextRow);
+            AddAtTheEnd(nextRow);
             row.Add(row.Last() + nextRow.Last());
         }
 
         return row.Last();
+    }
+
+    public static int Part02()
+    {
+        var input = Prepare();
+        var resultList = new List<int>();
+
+        foreach (var row in input)
+        {
+            resultList.Add(AddAtTheBegining(row));
+        }
+
+        return resultList.Sum();
+    }
+
+    private static int AddAtTheBegining(List<int> row)
+    {
+        var nextRow = new List<int>();
+
+        for (int i = 1; i < row.Count; i++)
+        {
+            nextRow.Add(row[i] - row[i - 1]);
+        }
+
+        if (nextRow.Any(x => x != 0))
+        {
+            AddAtTheBegining(nextRow);
+            row.Insert(0, row.First() - nextRow.First());
+        }
+
+        return row.First();
     }
 }
