@@ -1,4 +1,5 @@
-﻿
+﻿using System.Diagnostics;
+
 namespace AOC2023a;
 
 internal static class Day08
@@ -36,8 +37,10 @@ ZZZ = (ZZZ, ZZZ)";
         return steps;
     }
 
-    public static int Part02()
+    public static double Part02()
     {
+        var sw = new Stopwatch();
+        sw.Start();
         var input = File.ReadAllText("..\\..\\..\\inputDay08.txt");
 
         var direction = input.Split(Environment.NewLine)[0].ToCharArray();
@@ -48,37 +51,49 @@ ZZZ = (ZZZ, ZZZ)";
             .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).Skip(1)
             .ToDictionary(x => x.Split(" = ")[0], x => x.Split(" = ")[1].Split(", "));
 
-        var stepsList = new List<int>();
-        var starting = network.Where(x => x.Key.EndsWith('A')).ToDictionary();
-
-        var steps = 0;
+        var starting = network.Where(x => x.Key.EndsWith('A')).Select(x => x.Key).ToList();
+        var listOfSteps = new List<int>();
         
-        var currDirectionIndex = 0;
-        while ( true )
+        Parallel.ForEach(starting, (start) =>
         {
-            var list = new List<string>(); 
-            foreach (var (item, values) in starting)
+            var index = 0;
+            var current = start;
+            var step = 0;
+            while (true)
             {
-                var current = item;
-
-                while (!current.EndsWith('Z'))
+                index = index > direction.Length - 1 ? 0 : index;
+                current = direction[index] == 'L' ? network[current][0] : network[current][1];
+                step++;
+                index++;
+                if (current.EndsWith('Z'))
                 {
-                    currDirectionIndex = currDirectionIndex > direction.Length - 1 ? 0 : currDirectionIndex;
-                    current = direction[currDirectionIndex] == 'L' ? network[current][0] : network[current][1];
-                    steps++;
-                    currDirectionIndex++;
+                    listOfSteps.Add(step);
+                    break;
                 }
-                stepsList.Add(steps);
-            }
-            if (list.All(x => x.EndsWith('Z')))
+            }            
+        });
+
+        Console.WriteLine(string.Join(", ", listOfSteps));
+        double minSteps = listOfSteps.Min();
+
+        while (true)
+        {
+            var success = listOfSteps
+                .Select(x => minSteps / x)
+                .All(x => Math.Floor(x) == Math.Ceiling(x));
+
+            if (success)
             {
-
+                break;
             }
+            minSteps += listOfSteps.Min();
         }
-        
 
+        Console.WriteLine($"{minSteps:F0}");
+        sw.Stop();
+        Console.WriteLine(sw.Elapsed);
 
-
-        return stepsList.Max();
+        return minSteps;
     }
 }
+//10 241 191 004 509
