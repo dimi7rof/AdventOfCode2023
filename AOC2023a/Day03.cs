@@ -1,47 +1,79 @@
+using System.Text.RegularExpressions;
+
 namespace AOC2023a;
 
 public static class Day03
 {
-    public static void Part1()
+    public static int Part01()
     {
-        var sum = 0;
-        var input = File.ReadAllLines("..\\..\\..\\inputDay03.txt");
-        var input0 = File.ReadAllLines("..\\..\\..\\exampleDay03.txt"); //4361
+        var example = @"467..114..
+...*......
+..35..633.
+......#...
+617*......
+.....+.58.
+..592.....
+......755.
+...$.*....
+.664.598..";
 
-        var arr = input0.Select(x => x.ToArray()).ToArray();
+        var part1 = 0;
+        var part2 = 0;
 
-        for (var row = 0; row < arr.Length; row++)
+        var input = File.ReadAllText("..\\..\\..\\inputDay03.txt");
+       // input = example;
+        var inputArray = input.Split(Environment.NewLine);
+
+        string pattern = @"[\d]+";
+
+        for (int row = 0; row < inputArray.Length; row++)
         {
-            int digit = 0;
-            for (var ch = arr[row].Length - 1; ch >= 0; ch--)
+            var line = inputArray[row];
+            MatchCollection matches = Regex.Matches(line, pattern);
+            var start = 0;
+
+            foreach (Match match in matches.Cast<Match>())
             {
-                var currentChar = arr[row][ch];
-                if(int.TryParse(currentChar.ToString(), out int result))
+                var startIndex = line[start..].IndexOf(match.Value) + start;
+                var endIndex = startIndex + match.Value.Length - 1;
+
+                if (CheckAroud(inputArray, row, startIndex, match.Value))
                 {
-                    var multiplier = digit == 0 ? 1 : 10^digit.ToString().Length;
-                    digit = result * multiplier;   
+                    part1 += int.Parse(match.Value);
                 }
-                else
-                {
-                    sum += digit;
-                }
-                
-                
+                start = startIndex + match.Value.Length;
             }
         }
 
-
-
-
+        return part1; // 537732
     }
-    private static int GetDigit(char[][] arr, int row, int ch)
+
+    private static bool CheckAroud(string[] array, int row, int startIndex, string match)
     {
-        int digit = 0;
-        var currentChar = arr[row][ch];
-        if(int.TryParse(currentChar.ToString(), out int result))
+        var lenght = startIndex + match.Length >= array[row].Length ? match.Length : match.Length + 1;
+        lenght = startIndex == 0 ? lenght : lenght + 1;
+         var start = startIndex == 0 ? startIndex : startIndex - 1;
+        var searchInList = new List<string>();
+
+        if (row != 0)
         {
-            digit = digit*10 + GetDigit(arr, row, ch + 1);            
+            searchInList.Add(array[row - 1].Substring(start, lenght));
         }
-        return digit;
+        if (row != array.Length - 1)
+        {
+            searchInList.Add(array[row + 1].Substring(start, lenght));
+        }
+        if (startIndex != 0)
+        {
+            searchInList.Add(array[row].Substring(start , 1));
+        }
+        if (startIndex + match.Length < array[row].Length)
+        {
+            searchInList.Add(array[row].Substring(start + lenght - 1, 1));
+        }
+
+        var res = searchInList.Any(x => x.ToCharArray().Any(x => x != '.' && !char.IsDigit(x)));
+
+        return res;
     }
 }
